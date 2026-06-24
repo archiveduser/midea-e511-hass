@@ -1,0 +1,8 @@
+{
+  "name": "Midea Rice Cooker(MB-FB50E511)",
+  "domains": [
+    "midea_e511"
+  ],
+  "homeassistant": "2024.1.0",
+  "render_readme": true
+}

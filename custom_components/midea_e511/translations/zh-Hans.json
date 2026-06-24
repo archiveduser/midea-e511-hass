@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "美的 MB-FB50E511 电饭锅",
+        "description": "输入电饭锅的局域网地址和本地协议凭据。",
+        "data": {
+          "ip_address": "IP 地址",
+          "token": "Token",
+          "key": "Key",
+          "port": "端口",
+          "device_id": "设备 ID",
+          "device_name": "设备名称"
+        }
+      }
+    },
+    "error": {
+      "invalid_hex": "该值必须是有效的十六进制字符串。"
+    },
+    "abort": {
+      "already_configured": "这个电饭锅已经配置过。"
+    }
+  }
+}

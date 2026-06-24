@@ -1,0 +1,7 @@
+AGENTS.md
+midea_smart_home
+components/
+__pycache__/
+*.pyc
+test_*
+.agents

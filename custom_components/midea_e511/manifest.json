@@ -1,0 +1,16 @@
+{
+  "domain": "midea_e511",
+  "name": "Midea Rice Cooker(MB-FB50E511)",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/archiveduser/midea-e511-hass",
+  "issue_tracker": "https://github.com/archiveduser/midea-e511-hass/issues",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "requirements": [
+    "lupa>=2.0",
+    "pycryptodome>=3.15.0"
+  ],
+  "version": "0.1.0"
+}

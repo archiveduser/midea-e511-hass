@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Midea MB-FB50E511 rice cooker",
+        "description": "Enter the LAN address and local protocol credentials for the cooker.",
+        "data": {
+          "ip_address": "IP address",
+          "token": "Token",
+          "key": "Key",
+          "port": "Port",
+          "device_id": "Device ID",
+          "device_name": "Device name"
+        }
+      }
+    },
+    "error": {
+      "invalid_hex": "This value must be a valid hexadecimal string."
+    },
+    "abort": {
+      "already_configured": "This rice cooker is already configured."
+    }
+  }
+}
