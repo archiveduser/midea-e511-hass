@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import logging
+import os
+from functools import partial
+from pathlib import Path
 from typing import Any
 
 import voluptuous as vol
@@ -19,15 +22,19 @@ from .const import (
     CONF_SN,
     CONF_SN8,
     CONF_TOKEN,
-    DEFAULT_DEVICE_ID,
     DEFAULT_PORT,
-    DEFAULT_SN,
+    DEVICE_TYPE,
     DOMAIN,
-    SN8,
+    LUA_COMMON_PATH,
+    LUA_DEVICE_FILE,
+    PROTOCOL,
+    SUBTYPE,
     device_name_from_sn,
     sn8_from_sn,
 )
 from .discovery import discover_device
+from .midea_lib.device import DeviceController
+from .midea_lib.lua import MideaCodec, ensure_lua_files, write_file
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,6 +47,49 @@ def _validate_hex(value: str) -> bool:
     except ValueError:
         return False
     return True
+
+
+def _ensure_lua_common_files(lua_common_dir: str) -> None:
+    os.makedirs(lua_common_dir, exist_ok=True)
+    cjson, bit, cjson_lua, bit_lua = ensure_lua_files(lua_common_dir)
+    for file_path, content in ((cjson, cjson_lua), (bit, bit_lua)):
+        if not os.path.exists(file_path):
+            write_file(file_path, content)
+
+
+def _validate_local_connection(
+    *,
+    device_id: int,
+    ip_address: str,
+    token: str,
+    key: str,
+    sn: str,
+    sn8: str,
+    lua_file: str,
+    lua_common_dir: str,
+) -> bool:
+    _ensure_lua_common_files(lua_common_dir)
+    codec = MideaCodec(
+        lua_file,
+        lua_common_dir,
+        sn=sn,
+        subtype=SUBTYPE,
+        device_type=DEVICE_TYPE,
+        sn8=sn8,
+    )
+    controller = DeviceController(
+        device_id=device_id,
+        ip_address=ip_address,
+        port=DEFAULT_PORT,
+        token=token,
+        key=key,
+        codec=codec,
+        protocol=PROTOCOL,
+    )
+    try:
+        return controller.connect()
+    finally:
+        controller.close()
 
 
 class MideaEAE511ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -64,7 +114,6 @@ class MideaEAE511ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_KEY] = "invalid_hex"
 
             if not errors:
-                discovery_info: dict[str, Any] = {}
                 try:
                     discovery_info = await self.hass.async_add_executor_job(
                         discover_device, data[CONF_IP]
@@ -75,25 +124,55 @@ class MideaEAE511ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         data[CONF_IP],
                         err,
                     )
+                    errors["base"] = "cannot_discover"
+                    discovery_info = {}
 
-                sn = discovery_info.get(CONF_SN) or DEFAULT_SN
-                device_id = discovery_info.get(CONF_DEVICE_ID) or DEFAULT_DEVICE_ID
-                sn8 = discovery_info.get(CONF_SN8) or sn8_from_sn(sn) or SN8
-                device_name = device_name_from_sn(sn)
+                device_id = discovery_info.get(CONF_DEVICE_ID)
+                sn = discovery_info.get(CONF_SN)
 
-                data[CONF_PORT] = DEFAULT_PORT
-                data[CONF_DEVICE_ID] = device_id
-                data[CONF_SN] = sn
-                data[CONF_SN8] = sn8
-                data[CONF_DEVICE_NAME] = device_name
+                if not errors and (not device_id or not sn):
+                    errors["base"] = "cannot_discover"
 
-                await self.async_set_unique_id(f"{DOMAIN}_{data[CONF_DEVICE_ID]}")
-                self._abort_if_unique_id_configured(updates={CONF_IP: data[CONF_IP]})
+                if not errors:
+                    sn8 = discovery_info.get(CONF_SN8) or sn8_from_sn(sn)
+                    if not sn8:
+                        errors["base"] = "cannot_discover"
 
-                return self.async_create_entry(
-                    title=device_name,
-                    data=data,
-                )
+                if not errors:
+                    device_name = device_name_from_sn(sn)
+                    lua_file = str(Path(__file__).parent / "lua" / LUA_DEVICE_FILE)
+                    lua_common_dir = self.hass.config.path(LUA_COMMON_PATH)
+
+                    connected = await self.hass.async_add_executor_job(
+                        partial(
+                            _validate_local_connection,
+                            device_id=device_id,
+                            ip_address=data[CONF_IP],
+                            token=data[CONF_TOKEN],
+                            key=data[CONF_KEY],
+                            sn=sn,
+                            sn8=sn8,
+                            lua_file=lua_file,
+                            lua_common_dir=lua_common_dir,
+                        )
+                    )
+                    if not connected:
+                        errors["base"] = "cannot_connect"
+
+                if not errors:
+                    data[CONF_PORT] = DEFAULT_PORT
+                    data[CONF_DEVICE_ID] = device_id
+                    data[CONF_SN] = sn
+                    data[CONF_SN8] = sn8
+                    data[CONF_DEVICE_NAME] = device_name
+
+                    await self.async_set_unique_id(f"{DOMAIN}_{data[CONF_DEVICE_ID]}")
+                    self._abort_if_unique_id_configured(updates={CONF_IP: data[CONF_IP]})
+
+                    return self.async_create_entry(
+                        title=device_name,
+                        data=data,
+                    )
 
         return self.async_show_form(
             step_id="user",

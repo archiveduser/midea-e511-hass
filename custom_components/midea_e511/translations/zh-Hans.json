@@ -12,6 +12,8 @@
       }
     },
     "error": {
+      "cannot_connect": "已发现电饭锅，但 token 或 key 无法通过本地连接认证。",
+      "cannot_discover": "无法在这个 IP 地址发现美的 MB-FB50E511。",
       "invalid_hex": "该值必须是有效的十六进制字符串。"
     },
     "abort": {

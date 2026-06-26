@@ -25,7 +25,6 @@ from .const import (
     CONF_TOKEN,
     DEFAULT_DEVICE_NAME,
     DEFAULT_PORT,
-    DEFAULT_SN,
     DEFAULT_VALUES,
     DEVICE_TYPE,
     DOMAIN,
@@ -34,7 +33,6 @@ from .const import (
     MODEL,
     PLATFORMS,
     PROTOCOL,
-    SN8,
     SUBTYPE,
     display_sn,
 )
@@ -71,8 +69,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     device_id = entry.data[CONF_DEVICE_ID]
     device_name = entry.data.get(CONF_DEVICE_NAME) or DEFAULT_DEVICE_NAME
-    sn = entry.data.get(CONF_SN) or DEFAULT_SN
-    sn8 = entry.data.get(CONF_SN8) or SN8
+    sn = entry.data[CONF_SN]
+    sn8 = entry.data[CONF_SN8]
     serial_number = display_sn(sn)
     lua_file = Path(__file__).parent / "lua" / LUA_DEVICE_FILE
     lua_common_dir = Path(hass.config.config_dir) / LUA_COMMON_PATH

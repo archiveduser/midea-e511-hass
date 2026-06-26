@@ -12,6 +12,8 @@
       }
     },
     "error": {
+      "cannot_connect": "The cooker was discovered, but the token or key could not authenticate the local connection.",
+      "cannot_discover": "Could not discover a Midea MB-FB50E511 at this IP address.",
       "invalid_hex": "This value must be a valid hexadecimal string."
     },
     "abort": {

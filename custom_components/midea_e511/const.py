@@ -13,11 +13,9 @@ CONF_SN = "sn"
 CONF_SN8 = "sn8"
 CONF_TOKEN = "token"
 
-DEFAULT_DEVICE_ID = 210006724010482
 DEFAULT_DEVICE_NAME = "Midea MB-FB50E511"
 DEFAULT_PORT = 6444
 DEFAULT_MODE = "stewing"
-DEFAULT_SN = "0000EA51161000579351011006508SP5"
 
 DEVICE_TYPE = 0xEA
 PROTOCOL = 3
@@ -25,7 +23,7 @@ SUBTYPE = 0
 
 SN_PREFIX = "0000EA"
 SN8 = "61000579"
-MODEL = "MB-FB50Easy501/MB-FB50E511"
+MODEL = "MB-FB50E511"
 CATEGORY = "rice-cooker"
 
 LUA_DEVICE_FILE = "T0xEA_61000579.lua"
@@ -177,7 +175,7 @@ def device_name_from_sn(sn: str | None) -> str:
 def sn8_from_sn(sn: str | None) -> str:
     """Extract the SN8 code used by the local Lua profile."""
     if not sn or len(sn) <= 17:
-        return SN8
+        return ""
     return sn[9:17]
 
 

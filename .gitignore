@@ -10,3 +10,4 @@ status_records/
 .agents
 .local/
 .venv/
+.storage
