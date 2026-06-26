@@ -3,25 +3,20 @@
 from __future__ import annotations
 
 import asyncio
-from copy import deepcopy
-from typing import Any
 
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DEFAULT_MODE, DOMAIN
+from .const import DOMAIN
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
 
 BUTTONS = (
-    ("start", "Start", {"work_status": "cooking"}),
-    ("cancel", "Cancel", {"work_status": "cancel"}),
-    ("keep_warm", "Keep warm", {"work_status": "keep_warm"}),
-    ("schedule", "Schedule", {"work_status": "schedule"}),
-    ("refresh", "Refresh", None),
+    ("cancel", "取消", {"work_status": "cancel"}),
+    ("keep_warm", "保温", {"work_status": "keep_warm"}),
 )
 
 
@@ -52,44 +47,12 @@ class E511Button(E511Entity, ButtonEntity):
         device_id: int,
         key: str,
         name: str,
-        command: dict[str, Any] | None,
+        command: dict[str, str],
     ) -> None:
         super().__init__(coordinator, device_id, f"button_{key}", name)
-        self._key = key
         self._command = command
 
     async def async_press(self) -> None:
-        if self._key == "refresh":
-            await self.coordinator.async_refresh_device()
-            return
-
-        command = self._build_command()
-        await self.coordinator.async_set_control(command)
+        await self.coordinator.async_set_control(self._command)
         await asyncio.sleep(1)
         await self.coordinator.async_refresh_device()
-
-    def _build_command(self) -> dict[str, Any]:
-        command = deepcopy(self._command) if self._command else {}
-        data = self.coordinator.data or {}
-
-        if self._key in {"start", "schedule"}:
-            command.setdefault("mode", data.get("mode") or DEFAULT_MODE)
-
-        if self._key == "schedule":
-            command.setdefault("order_time_hour", int(data.get("order_time_hour") or 0))
-            command.setdefault("order_time_min", int(data.get("order_time_min") or 0))
-
-        if self._key == "start":
-            for attr in (
-                "mouthfeel",
-                "rice_type",
-                "rice_level",
-                "left_time_hour",
-                "left_time_min",
-                "order_time_hour",
-                "order_time_min",
-            ):
-                if attr in data:
-                    command.setdefault(attr, data[attr])
-
-        return command

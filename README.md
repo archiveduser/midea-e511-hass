@@ -13,9 +13,8 @@ device over the local Midea protocol.
 - Local protocol V3 connection
 - Status sensors for work status, remaining time, warming time, temperatures,
   voltage, error code, work stage, and related cooker flags
-- Select entities for cooking mode, mouthfeel, and rice type
-- Number entities for scheduled hour and minute
-- Buttons for start, cancel, keep warm, schedule, and refresh
+- Mode select entity with a focused MB-FB50E511 mode list
+- Buttons for cancel and keep warm
 
 ## Installation
 
@@ -63,26 +62,35 @@ The token and key must be hexadecimal strings for the local Midea V3 protocol.
 
 After setup, the integration creates entities for the cooker.
 
-To start cooking:
+To start or switch a cooking mode:
 
-1. Choose a cooking mode from the **Mode** select entity.
-2. Optionally choose **Mouthfeel** and **Rice type**.
-3. Press the **Start** button.
+1. Choose a mode from the **模式** select entity.
+2. The integration sends `cancel` first if the cooker is already running.
+3. The integration then starts the selected mode with `work_status=cooking`.
 
-To schedule cooking:
+Available mode labels are currently Chinese and mapped to temporary protocol
+values:
 
-1. Choose a cooking mode.
-2. Set **Schedule hour** and **Schedule minute**.
-3. Press the **Schedule** button.
+- 香浓粥 -> `fragrant_dense_congee`
+- 柴火饭 -> `firewood_rice`
+- 快速饭 -> `fast_rice`
+- 精华饭 -> `essence_rice`
+- 寿司饭 -> `sushi_rice`
+- 石锅饭 -> `stone_bowl_rice`
+- 热饭 -> `heat_rice`
+- 蒸煮 -> `stewing`
+- 煲汤 -> `cook_soup`
+- 煮粥 -> `cook_congee`
+- 稀饭 -> `gruel`
 
 To stop the cooker, press **Cancel**. To enter keep-warm mode, press
 **Keep warm**.
 
 ## Notes
 
-The MB-FB50E511 control path uses `work_status` commands for start, cancel,
-keep warm, and schedule. This differs from some generic Midea rice cooker
-mappings that use `work_switch`.
+The MB-FB50E511 control path uses `work_status` commands for cooking, cancel,
+and keep warm. This differs from some generic Midea rice cooker mappings that
+use `work_switch`.
 
 ## Credits
 

@@ -20,5 +20,33 @@
     "abort": {
       "already_configured": "This rice cooker is already configured."
     }
+  },
+  "entity": {
+    "button": {
+      "button_cancel": {
+        "name": "Cancel"
+      },
+      "button_keep_warm": {
+        "name": "Keep warm"
+      }
+    },
+    "select": {
+      "select_mode": {
+        "name": "Mode",
+        "state": {
+          "香浓粥": "Fragrant dense congee",
+          "柴火饭": "Firewood rice",
+          "快速饭": "Fast rice",
+          "精华饭": "Essence rice",
+          "寿司饭": "Sushi rice",
+          "石锅饭": "Stone bowl rice",
+          "热饭": "Reheat rice",
+          "蒸煮": "Steaming",
+          "煲汤": "Soup",
+          "煮粥": "Congee",
+          "稀饭": "Gruel"
+        }
+      }
+    }
   }
 }

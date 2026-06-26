@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
+import asyncio
+
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, MODE_OPTIONS, MOUTHFEEL_OPTIONS, RICE_TYPE_OPTIONS
+from .const import DOMAIN, MODE_OPTIONS
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
 
 SELECTS = (
-    ("mode", "Mode", MODE_OPTIONS),
-    ("mouthfeel", "Mouthfeel", MOUTHFEEL_OPTIONS),
-    ("rice_type", "Rice type", RICE_TYPE_OPTIONS),
+    ("mode", "模式", MODE_OPTIONS),
 )
 
 
@@ -31,7 +31,7 @@ async def async_setup_entry(
 
     async_add_entities(
         [
-            E511Select(coordinator, device_id, key, name, list(options))
+            E511Select(coordinator, device_id, key, name, options)
             for key, name, options in SELECTS
         ]
     )
@@ -46,23 +46,48 @@ class E511Select(E511Entity, SelectEntity):
         device_id: int,
         key: str,
         name: str,
-        options: list[str],
+        options: dict[str, str],
     ) -> None:
         super().__init__(coordinator, device_id, f"select_{key}", name)
         self._key = key
-        self._attr_options = options
+        self._options_map = options
+        self._attr_options = list(options)
 
     @property
     def current_option(self) -> str | None:
         data = self.coordinator.data or {}
         value = data.get(self._key)
-        if isinstance(value, str) and value in self.options:
-            return value
-        if isinstance(value, int) and 0 <= value < len(self.options):
-            return self.options[value]
+        for label, protocol_value in self._options_map.items():
+            if value == protocol_value:
+                return label
         return None
 
     async def async_select_option(self, option: str) -> None:
         if option not in self.options:
             return
-        await self.coordinator.async_set_control(self._key, option)
+
+        data = self.coordinator.data or {}
+        if data.get("work_status") != "cancel":
+            await self.coordinator.async_set_control({"work_status": "cancel"})
+            await asyncio.sleep(1)
+            await self.coordinator.async_refresh_device()
+            data = self.coordinator.data or {}
+
+        command = {
+            "mode": self._options_map[option],
+            "work_status": "cooking",
+        }
+
+        for attr in (
+            "mouthfeel",
+            "rice_type",
+            "rice_level",
+            "left_time_hour",
+            "left_time_min",
+        ):
+            if attr in data:
+                command[attr] = data[attr]
+
+        await self.coordinator.async_set_control(command)
+        await asyncio.sleep(1)
+        await self.coordinator.async_refresh_device()
