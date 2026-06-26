@@ -62,11 +62,7 @@ def discover_device(
 
 
 def _discovery_addresses(ip_address: str) -> list[str]:
-    addresses = [ip_address]
-    parts = ip_address.split(".")
-    if len(parts) == 4:
-        addresses.append(".".join(parts[:3] + ["255"]))
-    return list(dict.fromkeys(addresses))
+    return [ip_address]
 
 
 def _parse_response(
