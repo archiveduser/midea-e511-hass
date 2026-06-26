@@ -14,7 +14,7 @@ CONF_TOKEN = "token"
 DEFAULT_DEVICE_ID = 210006724010482
 DEFAULT_DEVICE_NAME = "Midea MB-FB50E511"
 DEFAULT_PORT = 6444
-DEFAULT_MODE = "stewing"
+DEFAULT_MODE = "cancel"
 
 DEVICE_TYPE = 0xEA
 PROTOCOL = 3
@@ -35,6 +35,8 @@ PLATFORMS = [
 ]
 
 MODE_OPTIONS = {
+    "取消": "cancel",
+    "保温": "keep_warm",
     "香浓粥": "fragrant_dense_congee",
     "柴火饭": "firewood_rice",
     "快速饭": "fast_rice",

@@ -71,6 +71,8 @@ To start or switch a cooking mode:
 Available mode labels are currently Chinese and mapped to temporary protocol
 values:
 
+- 取消 -> `cancel`
+- 保温 -> `keep_warm`
 - 香浓粥 -> `fragrant_dense_congee`
 - 柴火饭 -> `firewood_rice`
 - 快速饭 -> `fast_rice`
