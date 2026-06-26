@@ -14,7 +14,7 @@ CONF_TOKEN = "token"
 DEFAULT_DEVICE_ID = 210006724010482
 DEFAULT_DEVICE_NAME = "Midea MB-FB50E511"
 DEFAULT_PORT = 6444
-DEFAULT_MODE = "cancel"
+DEFAULT_MODE = "stewing"
 
 DEVICE_TYPE = 0xEA
 PROTOCOL = 3
@@ -35,8 +35,6 @@ PLATFORMS = [
 ]
 
 MODE_OPTIONS = {
-    "取消": "cancel",
-    "保温": "keep_warm",
     "香浓粥": "fragrant_dense_congee",
     "柴火饭": "firewood_rice",
     "快速饭": "fast_rice",
@@ -154,3 +152,23 @@ DEFAULT_VALUES = {
     "warm_time_hour": 0,
     "warm_time_min": 0,
 }
+
+
+def build_start_command(mode: str | None, data: dict) -> dict:
+    """Build a start command using mode defaults captured from the cooker."""
+    if mode in (None, "", "cancel", "keep_warm"):
+        mode = data.get("mode") or DEFAULT_MODE
+    if mode in (None, "", "cancel", "keep_warm"):
+        mode = DEFAULT_MODE
+
+    command = {
+        "mode": mode,
+        "work_status": "cooking",
+    }
+    command.update(MODE_START_DEFAULTS.get(mode, {}))
+
+    for attr in ("mouthfeel", "rice_type", "rice_level"):
+        if attr not in command and attr in data:
+            command[attr] = data[attr]
+
+    return command

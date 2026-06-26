@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, MODE_OPTIONS, MODE_START_DEFAULTS
+from .const import DOMAIN, MODE_OPTIONS, build_start_command
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
@@ -56,17 +56,11 @@ class E511Select(E511Entity, SelectEntity):
     @property
     def current_option(self) -> str | None:
         data = self.coordinator.data or {}
-        work_status = data.get("work_status")
-        if work_status == "cancel":
-            return "取消"
-        if work_status == "keep_warm":
-            return "保温"
-
         value = data.get(self._key)
         for label, protocol_value in self._options_map.items():
-            if protocol_value not in ("cancel", "keep_warm") and value == protocol_value:
+            if value == protocol_value:
                 return label
-        return "取消"
+        return None
 
     async def async_select_option(self, option: str) -> None:
         if option not in self.options:
@@ -75,30 +69,13 @@ class E511Select(E511Entity, SelectEntity):
         data = self.coordinator.data or {}
         mode = self._options_map[option]
 
-        if mode in ("cancel", "keep_warm"):
-            await self.coordinator.async_set_control({"work_status": mode})
-            await asyncio.sleep(1)
-            await self.coordinator.async_refresh_device()
-            return
-
         if data.get("work_status") != "cancel":
             await self.coordinator.async_set_control({"work_status": "cancel"})
             await asyncio.sleep(1)
             await self.coordinator.async_refresh_device()
             data = self.coordinator.data or {}
 
-        command = {
-            "mode": mode,
-            "work_status": "cooking",
-        }
-
-        mode_defaults = MODE_START_DEFAULTS.get(mode, {})
-        command.update(mode_defaults)
-
-        for attr in ("mouthfeel", "rice_type", "rice_level"):
-            if attr not in command and attr in data:
-                command[attr] = data[attr]
-
+        command = build_start_command(mode, data)
         await self.coordinator.async_set_control(command)
         await asyncio.sleep(1)
         await self.coordinator.async_refresh_device()

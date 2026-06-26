@@ -9,12 +9,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, build_start_command
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
 
 BUTTONS = (
+    ("start", "开始", None),
     ("cancel", "取消", {"work_status": "cancel"}),
     ("keep_warm", "保温", {"work_status": "keep_warm"}),
 )
@@ -47,12 +48,23 @@ class E511Button(E511Entity, ButtonEntity):
         device_id: int,
         key: str,
         name: str,
-        command: dict[str, str],
+        command: dict[str, str] | None,
     ) -> None:
         super().__init__(coordinator, device_id, f"button_{key}", name)
         self._command = command
 
     async def async_press(self) -> None:
-        await self.coordinator.async_set_control(self._command)
+        if self._command is None:
+            data = self.coordinator.data or {}
+            if data.get("work_status") != "cancel":
+                await self.coordinator.async_set_control({"work_status": "cancel"})
+                await asyncio.sleep(1)
+                await self.coordinator.async_refresh_device()
+                data = self.coordinator.data or {}
+            command = build_start_command(data.get("mode"), data)
+        else:
+            command = self._command
+
+        await self.coordinator.async_set_control(command)
         await asyncio.sleep(1)
         await self.coordinator.async_refresh_device()

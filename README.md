@@ -14,7 +14,7 @@ device over the local Midea protocol.
 - Status sensors for work status, remaining time, warming time, temperatures,
   voltage, error code, work stage, and related cooker flags
 - Mode select entity with a focused MB-FB50E511 mode list
-- Buttons for cancel and keep warm
+- Buttons for start, cancel, and keep warm
 
 ## Installation
 
@@ -71,8 +71,6 @@ To start or switch a cooking mode:
 Available mode labels are currently Chinese and mapped to temporary protocol
 values:
 
-- 取消 -> `cancel`
-- 保温 -> `keep_warm`
 - 香浓粥 -> `fragrant_dense_congee`
 - 柴火饭 -> `firewood_rice`
 - 快速饭 -> `fast_rice`
@@ -85,8 +83,8 @@ values:
 - 煮粥 -> `boil_congee`
 - 稀饭 -> `gruel`
 
-To stop the cooker, press **Cancel**. To enter keep-warm mode, press
-**Keep warm**.
+To start the currently reported mode, press **Start**. To stop the cooker,
+press **Cancel**. To enter keep-warm mode, press **Keep warm**.
 
 ## Notes
 
