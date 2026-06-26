@@ -11,8 +11,8 @@ device over the local Midea protocol.
 
 - Manual Home Assistant UI setup
 - Local protocol V3 connection
-- Status sensors for work status, remaining time, warming time, top and bottom
-  temperatures, and diagnostic error code
+- Status sensors for work status, mode, remaining time, warming time, top and
+  bottom temperatures, diagnostic error code, and diagnostic work stage
 - Mode select entity with a focused MB-FB50E511 mode list
 - Buttons for start, cancel, and keep warm
 

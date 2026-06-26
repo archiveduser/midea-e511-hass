@@ -18,7 +18,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, MODE_OPTIONS
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
@@ -29,6 +29,12 @@ SENSORS: tuple[dict[str, Any], ...] = (
         "name": "Work status",
         "device_class": SensorDeviceClass.ENUM,
         "options": ["cancel", "schedule", "cooking", "keep_warm", "awakening_rice"],
+    },
+    {
+        "key": "mode",
+        "name": "Mode",
+        "device_class": SensorDeviceClass.ENUM,
+        "options": list(MODE_OPTIONS.values()),
     },
     {
         "key": "remain_time",
@@ -61,6 +67,11 @@ SENSORS: tuple[dict[str, Any], ...] = (
     {
         "key": "error_code",
         "name": "Error code",
+        "entity_category": EntityCategory.DIAGNOSTIC,
+    },
+    {
+        "key": "work_stage",
+        "name": "Work stage",
         "entity_category": EntityCategory.DIAGNOSTIC,
     },
 )
