@@ -32,6 +32,7 @@ class E511Entity(CoordinatorEntity[E511Coordinator]):
             name=coordinator.device_name,
             manufacturer="Midea",
             model=MODEL,
+            serial_number=coordinator.serial_number or None,
             suggested_area=CATEGORY,
         )
 

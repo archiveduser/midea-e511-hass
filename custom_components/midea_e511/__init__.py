@@ -20,9 +20,12 @@ from .const import (
     CONF_IP,
     CONF_KEY,
     CONF_PORT,
+    CONF_SN,
+    CONF_SN8,
     CONF_TOKEN,
     DEFAULT_DEVICE_NAME,
     DEFAULT_PORT,
+    DEFAULT_SN,
     DEFAULT_VALUES,
     DEVICE_TYPE,
     DOMAIN,
@@ -33,6 +36,7 @@ from .const import (
     PROTOCOL,
     SN8,
     SUBTYPE,
+    display_sn,
 )
 from .coordinator import E511Coordinator
 from .midea_lib.device import MideaDevice
@@ -67,6 +71,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     device_id = entry.data[CONF_DEVICE_ID]
     device_name = entry.data.get(CONF_DEVICE_NAME) or DEFAULT_DEVICE_NAME
+    sn = entry.data.get(CONF_SN) or DEFAULT_SN
+    sn8 = entry.data.get(CONF_SN8) or SN8
+    serial_number = display_sn(sn)
     lua_file = Path(__file__).parent / "lua" / LUA_DEVICE_FILE
     lua_common_dir = Path(hass.config.config_dir) / LUA_COMMON_PATH
 
@@ -81,8 +88,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             protocol=PROTOCOL,
             model=MODEL,
             subtype=SUBTYPE,
-            sn="",
-            sn8=SN8,
+            sn=sn,
+            sn8=sn8,
             lua_file=str(lua_file),
             lua_common_dir=str(lua_common_dir),
             device_name=device_name,
@@ -113,7 +120,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "E511 rice cooker did not connect during setup; background reconnect will continue"
         )
 
-    coordinator = E511Coordinator(hass, device, device_name)
+    coordinator = E511Coordinator(hass, device, device_name, serial_number)
     hass.data[DOMAIN][entry.entry_id] = {
         "coordinator": coordinator,
         "device": device,

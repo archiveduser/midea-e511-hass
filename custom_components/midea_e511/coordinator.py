@@ -23,9 +23,11 @@ class E511Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         hass: HomeAssistant,
         device: MideaDevice,
         device_name: str,
+        serial_number: str = "",
     ) -> None:
         self.device = device
         self.device_name = device_name
+        self.serial_number = serial_number
         self._active = True
 
         super().__init__(

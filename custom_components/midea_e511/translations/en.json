@@ -3,14 +3,11 @@
     "step": {
       "user": {
         "title": "Midea MB-FB50E511 rice cooker",
-        "description": "Enter the LAN address and local protocol credentials for the cooker.",
+        "description": "Enter the LAN address and local protocol credentials. The device ID and serial number will be discovered automatically when saved.",
         "data": {
           "ip_address": "IP address",
           "token": "Token",
-          "key": "Key",
-          "port": "Port",
-          "device_id": "Device ID",
-          "device_name": "Device name"
+          "key": "Key"
         }
       }
     },

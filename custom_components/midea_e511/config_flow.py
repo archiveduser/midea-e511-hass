@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import voluptuous as vol
@@ -15,12 +16,20 @@ from .const import (
     CONF_IP,
     CONF_KEY,
     CONF_PORT,
+    CONF_SN,
+    CONF_SN8,
     CONF_TOKEN,
     DEFAULT_DEVICE_ID,
-    DEFAULT_DEVICE_NAME,
     DEFAULT_PORT,
+    DEFAULT_SN,
     DOMAIN,
+    SN8,
+    device_name_from_sn,
+    sn8_from_sn,
 )
+from .discovery import discover_device
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _validate_hex(value: str) -> bool:
@@ -55,11 +64,34 @@ class MideaEAE511ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_KEY] = "invalid_hex"
 
             if not errors:
+                discovery_info: dict[str, Any] = {}
+                try:
+                    discovery_info = await self.hass.async_add_executor_job(
+                        discover_device, data[CONF_IP]
+                    )
+                except Exception as err:
+                    _LOGGER.warning(
+                        "Failed to discover MB-FB50E511 metadata from %s: %s",
+                        data[CONF_IP],
+                        err,
+                    )
+
+                sn = discovery_info.get(CONF_SN) or DEFAULT_SN
+                device_id = discovery_info.get(CONF_DEVICE_ID) or DEFAULT_DEVICE_ID
+                sn8 = discovery_info.get(CONF_SN8) or sn8_from_sn(sn) or SN8
+                device_name = device_name_from_sn(sn)
+
+                data[CONF_PORT] = DEFAULT_PORT
+                data[CONF_DEVICE_ID] = device_id
+                data[CONF_SN] = sn
+                data[CONF_SN8] = sn8
+                data[CONF_DEVICE_NAME] = device_name
+
                 await self.async_set_unique_id(f"{DOMAIN}_{data[CONF_DEVICE_ID]}")
                 self._abort_if_unique_id_configured(updates={CONF_IP: data[CONF_IP]})
 
                 return self.async_create_entry(
-                    title=data.get(CONF_DEVICE_NAME) or DEFAULT_DEVICE_NAME,
+                    title=device_name,
                     data=data,
                 )
 
@@ -70,11 +102,6 @@ class MideaEAE511ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_IP): str,
                     vol.Required(CONF_TOKEN): str,
                     vol.Required(CONF_KEY): str,
-                    vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
-                    vol.Optional(CONF_DEVICE_ID, default=DEFAULT_DEVICE_ID): int,
-                    vol.Optional(
-                        CONF_DEVICE_NAME, default=DEFAULT_DEVICE_NAME
-                    ): str,
                 }
             ),
             errors=errors,
