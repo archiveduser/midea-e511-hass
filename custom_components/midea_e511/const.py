@@ -44,8 +44,88 @@ MODE_OPTIONS = {
     "热饭": "heat_rice",
     "蒸煮": "stewing",
     "煲汤": "cook_soup",
-    "煮粥": "cook_congee",
+    "煮粥": "boil_congee",
     "稀饭": "gruel",
+}
+
+MODE_START_DEFAULTS = {
+    "fragrant_dense_congee": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 1,
+        "left_time_min": 0,
+    },
+    "firewood_rice": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 40,
+    },
+    "fast_rice": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 30,
+    },
+    "essence_rice": {
+        "mouthfeel": "middle",
+        "rice_type": "longrain",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 58,
+    },
+    "sushi_rice": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 58,
+    },
+    "stone_bowl_rice": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 58,
+    },
+    "heat_rice": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 25,
+    },
+    "stewing": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 30,
+    },
+    "cook_soup": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 2,
+        "left_time_min": 0,
+    },
+    "boil_congee": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 2,
+        "left_time_min": 0,
+    },
+    "gruel": {
+        "mouthfeel": "none",
+        "rice_type": "none",
+        "rice_level": 3,
+        "left_time_hour": 0,
+        "left_time_min": 58,
+    },
 }
 
 CALCULATE_CONFIG = {

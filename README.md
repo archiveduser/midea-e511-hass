@@ -80,7 +80,7 @@ values:
 - 热饭 -> `heat_rice`
 - 蒸煮 -> `stewing`
 - 煲汤 -> `cook_soup`
-- 煮粥 -> `cook_congee`
+- 煮粥 -> `boil_congee`
 - 稀饭 -> `gruel`
 
 To stop the cooker, press **Cancel**. To enter keep-warm mode, press

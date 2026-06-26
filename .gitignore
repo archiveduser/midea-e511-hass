@@ -4,6 +4,9 @@ components/
 __pycache__/
 *.pyc
 test_*
+status_records/
+*.log
+*.jsonl
 .agents
 .local/
 .venv/

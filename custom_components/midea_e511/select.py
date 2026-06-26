@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, MODE_OPTIONS
+from .const import DOMAIN, MODE_OPTIONS, MODE_START_DEFAULTS
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
@@ -73,19 +73,17 @@ class E511Select(E511Entity, SelectEntity):
             await self.coordinator.async_refresh_device()
             data = self.coordinator.data or {}
 
+        mode = self._options_map[option]
         command = {
-            "mode": self._options_map[option],
+            "mode": mode,
             "work_status": "cooking",
         }
 
-        for attr in (
-            "mouthfeel",
-            "rice_type",
-            "rice_level",
-            "left_time_hour",
-            "left_time_min",
-        ):
-            if attr in data:
+        mode_defaults = MODE_START_DEFAULTS.get(mode, {})
+        command.update(mode_defaults)
+
+        for attr in ("mouthfeel", "rice_type", "rice_level"):
+            if attr not in command and attr in data:
                 command[attr] = data[attr]
 
         await self.coordinator.async_set_control(command)
