@@ -5,7 +5,7 @@ from __future__ import annotations
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CATEGORY, DOMAIN, MODEL, SN
+from .const import CATEGORY, DOMAIN, MODEL
 from .coordinator import E511Coordinator
 
 
@@ -32,7 +32,6 @@ class E511Entity(CoordinatorEntity[E511Coordinator]):
             name=coordinator.device_name,
             manufacturer="Midea",
             model=MODEL,
-            serial_number=SN,
             suggested_area=CATEGORY,
         )
 

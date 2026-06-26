@@ -31,7 +31,6 @@ from .const import (
     MODEL,
     PLATFORMS,
     PROTOCOL,
-    SN,
     SN8,
     SUBTYPE,
 )
@@ -82,7 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             protocol=PROTOCOL,
             model=MODEL,
             subtype=SUBTYPE,
-            sn=SN,
+            sn="",
             sn8=SN8,
             lua_file=str(lua_file),
             lua_common_dir=str(lua_common_dir),
