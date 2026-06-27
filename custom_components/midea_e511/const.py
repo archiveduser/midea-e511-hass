@@ -13,9 +13,13 @@ CONF_SN = "sn"
 CONF_SN8 = "sn8"
 CONF_TOKEN = "token"
 
+ATTR_MODE = "mode"
+SERVICE_START_MODE = "start_mode"
+
 DEFAULT_DEVICE_NAME = "Midea MB-FB50E511"
 DEFAULT_PORT = 6444
 DEFAULT_MODE = "stewing"
+KEEP_WARM_MODE = "keep_warm"
 
 DEVICE_TYPE = 0xEA
 PROTOCOL = 3
@@ -179,11 +183,28 @@ def sn8_from_sn(sn: str | None) -> str:
     return sn[9:17]
 
 
+def resolve_mode(mode: str | None) -> str | None:
+    """Resolve a user-facing mode label or protocol value to a protocol mode."""
+    if not mode:
+        return None
+    if mode in MODE_OPTIONS:
+        return MODE_OPTIONS[mode]
+    if mode in MODE_OPTIONS.values() or mode == KEEP_WARM_MODE:
+        return mode
+    return None
+
+
 def build_start_command(mode: str | None, data: dict) -> dict:
     """Build a start command using mode defaults captured from the cooker."""
-    if mode in (None, "", "cancel", "keep_warm"):
+    if mode == KEEP_WARM_MODE:
+        return {
+            "mode": KEEP_WARM_MODE,
+            "work_status": KEEP_WARM_MODE,
+        }
+
+    if mode in (None, "", "cancel"):
         mode = data.get("mode") or DEFAULT_MODE
-    if mode in (None, "", "cancel", "keep_warm"):
+    if mode in (None, "", "cancel", KEEP_WARM_MODE):
         mode = DEFAULT_MODE
 
     command = {

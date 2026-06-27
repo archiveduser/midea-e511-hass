@@ -9,15 +9,15 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, build_start_command
+from .const import DOMAIN, KEEP_WARM_MODE
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
 
 BUTTONS = (
-    ("start", "开始", None),
+    ("start", "开始", "start"),
     ("cancel", "取消", {"work_status": "cancel"}),
-    ("keep_warm", "保温", {"work_status": "keep_warm"}),
+    ("keep_warm", "保温", KEEP_WARM_MODE),
 )
 
 
@@ -48,23 +48,20 @@ class E511Button(E511Entity, ButtonEntity):
         device_id: int,
         key: str,
         name: str,
-        command: dict[str, str] | None,
+        command: dict[str, str] | str,
     ) -> None:
         super().__init__(coordinator, device_id, f"button_{key}", name)
         self._command = command
 
     async def async_press(self) -> None:
-        if self._command is None:
+        if self._command == "start":
             data = self.coordinator.data or {}
-            if data.get("work_status") != "cancel":
-                await self.coordinator.async_set_control({"work_status": "cancel"})
-                await asyncio.sleep(1)
-                await self.coordinator.async_refresh_device()
-                data = self.coordinator.data or {}
-            command = build_start_command(data.get("mode"), data)
-        else:
-            command = self._command
+            await self.coordinator.async_start_mode(data.get("mode"))
+            return
+        if self._command == KEEP_WARM_MODE:
+            await self.coordinator.async_start_mode(KEEP_WARM_MODE)
+            return
 
-        await self.coordinator.async_set_control(command)
+        await self.coordinator.async_set_control(self._command)
         await asyncio.sleep(1)
         await self.coordinator.async_refresh_device()

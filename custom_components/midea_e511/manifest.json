@@ -1,6 +1,6 @@
 {
   "domain": "midea_e511",
-  "name": "Midea Rice Cooker(MB-FB50E511)",
+  "name": "Midea MB-FB50E511",
   "codeowners": [],
   "config_flow": true,
   "dependencies": [],

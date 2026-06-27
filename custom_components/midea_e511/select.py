@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, MODE_OPTIONS, build_start_command
+from .const import DOMAIN, MODE_OPTIONS
 from .coordinator import E511Coordinator
 from .entity import E511Entity
 
@@ -73,9 +73,12 @@ class E511Select(E511Entity, SelectEntity):
             await self.coordinator.async_set_control({"work_status": "cancel"})
             await asyncio.sleep(1)
             await self.coordinator.async_refresh_device()
-            data = self.coordinator.data or {}
 
-        command = build_start_command(mode, data)
-        await self.coordinator.async_set_control(command)
+        await self.coordinator.async_set_control(
+            {
+                "mode": mode,
+                "work_status": "cancel",
+            }
+        )
         await asyncio.sleep(1)
         await self.coordinator.async_refresh_device()

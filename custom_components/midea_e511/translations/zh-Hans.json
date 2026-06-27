@@ -22,6 +22,9 @@
   },
   "entity": {
     "button": {
+      "button_start": {
+        "name": "开始"
+      },
       "button_cancel": {
         "name": "取消"
       },

@@ -8,11 +8,14 @@ import os
 from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.typing import ConfigType
 import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
 
 from .const import (
+    ATTR_MODE,
     CALCULATE_CONFIG,
     CATEGORY,
     CONF_DEVICE_ID,
@@ -28,13 +31,17 @@ from .const import (
     DEFAULT_VALUES,
     DEVICE_TYPE,
     DOMAIN,
+    KEEP_WARM_MODE,
     LUA_COMMON_PATH,
     LUA_DEVICE_FILE,
+    MODE_OPTIONS,
     MODEL,
     PLATFORMS,
     PROTOCOL,
+    SERVICE_START_MODE,
     SUBTYPE,
     display_sn,
+    resolve_mode,
 )
 from .coordinator import E511Coordinator
 from .midea_lib.device import MideaDevice
@@ -43,6 +50,7 @@ from .midea_lib.lua import ensure_lua_files, write_file
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+START_MODE_SCHEMA = vol.Schema({vol.Required(ATTR_MODE): cv.string})
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -59,6 +67,34 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     for file_path, content in ((cjson, cjson_lua), (bit, bit_lua)):
         if not os.path.exists(file_path):
             await hass.async_add_executor_job(write_file, file_path, content)
+
+    async def _async_handle_start_mode(call: ServiceCall) -> None:
+        mode = resolve_mode(call.data[ATTR_MODE])
+        if mode is None:
+            raise HomeAssistantError(
+                "Unsupported MB-FB50E511 mode. Use one of: "
+                f"{', '.join([*MODE_OPTIONS, *MODE_OPTIONS.values(), KEEP_WARM_MODE])}"
+            )
+
+        coordinators = [
+            entry_data["coordinator"]
+            for entry_data in hass.data.get(DOMAIN, {}).values()
+            if "coordinator" in entry_data
+        ]
+        if not coordinators:
+            raise HomeAssistantError("No Midea MB-FB50E511 devices are configured")
+
+        await asyncio.gather(
+            *(coordinator.async_start_mode(mode) for coordinator in coordinators)
+        )
+
+    if not hass.services.has_service(DOMAIN, SERVICE_START_MODE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_START_MODE,
+            _async_handle_start_mode,
+            schema=START_MODE_SCHEMA,
+        )
 
     return True
 

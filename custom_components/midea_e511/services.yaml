@@ -1,0 +1,24 @@
+start_mode:
+  name: Start mode
+  description: Start the Midea MB-FB50E511 in the selected mode.
+  fields:
+    mode:
+      name: Mode
+      description: Chinese mode label, protocol mode value, or keep_warm.
+      required: true
+      example: stewing
+      selector:
+        select:
+          options:
+            - fragrant_dense_congee
+            - firewood_rice
+            - fast_rice
+            - essence_rice
+            - sushi_rice
+            - stone_bowl_rice
+            - heat_rice
+            - stewing
+            - cook_soup
+            - boil_congee
+            - gruel
+            - keep_warm

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .const import build_start_command
 from .midea_lib.device import MideaDevice
 
 _LOGGER = logging.getLogger(__name__)
@@ -69,3 +71,18 @@ class E511Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     async def async_refresh_device(self) -> None:
         """Ask the device for fresh status."""
         await self.hass.async_add_executor_job(self.device.refresh_status)
+
+    async def async_start_mode(self, mode: str | None) -> dict[str, Any]:
+        """Start a cooker mode, cancelling the current run first when needed."""
+        data = self.data or {}
+        if data.get("work_status") != "cancel":
+            await self.async_set_control({"work_status": "cancel"})
+            await asyncio.sleep(1)
+            await self.async_refresh_device()
+            data = self.data or {}
+
+        command = build_start_command(mode, data)
+        result = await self.async_set_control(command)
+        await asyncio.sleep(1)
+        await self.async_refresh_device()
+        return result

@@ -1,4 +1,4 @@
-# Midea Rice Cooker(MB-FB50E511) for Home Assistant
+# Midea MB-FB50E511 for Home Assistant
 
 Home Assistant custom integration for the Midea MB-FB50E511 rice cooker.
 
@@ -14,6 +14,7 @@ device over the local Midea protocol.
 - Status sensors for work status, mode, remaining time, warming time, top and
   bottom temperatures, diagnostic error code, and diagnostic work stage
 - Mode select entity with a focused MB-FB50E511 mode list
+- `midea_e511.start_mode` action for starting a mode directly
 - Buttons for start, cancel, and keep warm
 
 ## Installation
@@ -30,7 +31,7 @@ device over the local Midea protocol.
    ```
 
 5. Select category **Integration**.
-6. Install **Midea Rice Cooker(MB-FB50E511)**.
+6. Install **Midea MB-FB50E511**.
 7. Restart Home Assistant.
 
 ### Manual Installation
@@ -47,26 +48,25 @@ After copying, restart Home Assistant.
 
 1. In Home Assistant, go to **Settings** -> **Devices & services**.
 2. Click **Add integration**.
-3. Search for **Midea Rice Cooker(MB-FB50E511)**.
+3. Search for **Midea MB-FB50E511**.
 4. Enter:
    - IP address
    - Token
    - Key
-   - Port, usually `6444`
-   - Device ID, optional unless your cooker uses a different ID
-   - Device name
 
-The token and key must be hexadecimal strings for the local Midea V3 protocol.
+When saved, the integration discovers the device ID, SN, and SN8 from the
+configured IP address, then verifies the local connection with the supplied
+token and key. The token and key must be hexadecimal strings for the local
+Midea V3 protocol.
 
 ## Usage
 
 After setup, the integration creates entities for the cooker.
 
-To start or switch a cooking mode:
+To choose a cooking mode without starting it:
 
 1. Choose a mode from the **模式** select entity.
-2. The integration sends `cancel` first if the cooker is already running.
-3. The integration then starts the selected mode with `work_status=cooking`.
+2. The integration sends the selected `mode` while keeping `work_status=cancel`.
 
 Available mode labels are currently Chinese and mapped to temporary protocol
 values:
@@ -83,14 +83,26 @@ values:
 - 煮粥 -> `boil_congee`
 - 稀饭 -> `gruel`
 
-To start the currently reported mode, press **Start**. To stop the cooker,
-press **Cancel**. To enter keep-warm mode, press **Keep warm**.
+To start a mode directly, call the Home Assistant action:
+
+```yaml
+action: midea_e511.start_mode
+data:
+  mode: stewing
+```
+
+The `mode` value can be one of the protocol values above, a Chinese mode label,
+or `keep_warm`.
+
+To start the currently selected/reported mode, press **Start**. To stop the
+cooker, press **Cancel**. To enter keep-warm mode, press **Keep warm**; this
+uses the same start-mode path with `mode=keep_warm`.
 
 ## Notes
 
-The MB-FB50E511 control path uses `work_status` commands for cooking, cancel,
-and keep warm. This differs from some generic Midea rice cooker mappings that
-use `work_switch`.
+The MB-FB50E511 control path uses `mode` and `work_status` commands. The mode
+select entity does not start cooking by itself; use **Start** or the
+`midea_e511.start_mode` action to begin a mode.
 
 ## Credits
 
